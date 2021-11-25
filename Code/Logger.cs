@@ -86,11 +86,23 @@ namespace UnityCommonFeatures
         {
             Debug.Assert(assertValue, assertionFailMessage);
         }
-    
+
         [Conditional("ENABLE_LOGGING")]
         public static void Assert(Func<bool> predicate, object assertionFailMessage)
         {
             Debug.Assert(predicate(), assertionFailMessage.ToString());
+        }
+        
+        [Conditional("ENABLE_LOGGING")]
+        public static void Assert(bool assertValue, string assertionFailMessage, Object context)
+        {
+            Debug.Assert(assertValue, assertionFailMessage, context);
+        }
+
+        [Conditional("ENABLE_LOGGING")]
+        public static void Assert(Func<bool> predicate, object assertionFailMessage, Object context)
+        {
+            Debug.Assert(predicate(), assertionFailMessage.ToString(), context);
         }
 
         [Conditional("ENABLE_LOGGING")]
