@@ -181,7 +181,7 @@ namespace UnityCommonFeatures
             {
                 StopCoroutine(_showHideCoroutine);
             }
-            StartCoroutine(ShowCoroutine(instant, onComplete));
+            _showHideCoroutine = StartCoroutine(ShowCoroutine(instant, onComplete));
         }
 
         /// <summary>
@@ -197,7 +197,7 @@ namespace UnityCommonFeatures
             {
                 StopCoroutine(_showHideCoroutine);
             }
-            StartCoroutine(HideCoroutine(instant, onComplete));
+            _showHideCoroutine = StartCoroutine(HideCoroutine(instant, onComplete));
         }
 
         private void CacheSelectablesColours()
