@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 namespace UnityCommonFeatures
 {
@@ -9,8 +10,13 @@ namespace UnityCommonFeatures
         private Func<State> _onUpdate;
         private Action _onExit;
 
+        private float _startTime = 0f;
+
         public static readonly State NoTransition = null;
         public static readonly State CompleteState = new State(null);
+
+        public float StateStartTime => _startTime;
+        public float TimeSinceStateStart => Time.time - _startTime;
 
         public State(StateMachine stateMachine)
         {
@@ -30,6 +36,7 @@ namespace UnityCommonFeatures
 
         public void EnterState()
         {
+            _startTime = Time.time;
             _onEnter?.Invoke();
         }
 
