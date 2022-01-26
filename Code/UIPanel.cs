@@ -360,6 +360,7 @@ namespace UnityCommonFeatures
         private void SetFadeAmount(float fade)
         {
             _canvasGroup.alpha = fade;
+            OnPanelAlphaSet(fade);
         }
 
         #endregion
@@ -382,6 +383,8 @@ namespace UnityCommonFeatures
         protected virtual void OnHideCompleted() { }
     
         protected virtual void OnShowAmountChanged(float showAmt) { }
+        
+        protected virtual void OnPanelAlphaSet(float alpha) { }
 
         #endregion
 
