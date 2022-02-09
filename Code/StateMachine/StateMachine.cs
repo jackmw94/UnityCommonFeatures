@@ -38,7 +38,7 @@ namespace UnityCommonFeatures
             startingState.EnterState();
         }
 
-        private void Update()
+        protected virtual void Update()
         {
             if (IsComplete)
             {
