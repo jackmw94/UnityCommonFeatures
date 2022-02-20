@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 using UnityExtras.Code.Core;
 using static UnityExtras.Code.Optional.EasingFunctions.EasingFunctions;
@@ -13,6 +14,14 @@ namespace UnityCommonFeatures
     [DefaultExecutionOrder(-1), RequireComponent(typeof(CanvasGroup))]
     public class UIPanel : MonoBehaviour
     {
+        public enum PanelState
+        {
+            Hidden,
+            ChangingToShow,
+            Showing,
+            ChangingToHide
+        }
+        
         private class NoAnimationTypeException : Exception
         {
             public NoAnimationTypeException(string message) : base(message) { }
@@ -23,13 +32,24 @@ namespace UnityCommonFeatures
         {
             [SerializeField] private Vector2 _leftTop = Vector3.zero;
             [SerializeField] private  Vector2 _rightBottom = Vector3.zero;
-            public Vector2 MinAnchors = Vector2.zero;
-            public Vector2 MaxAnchors = Vector2.one;
+            [SerializeField, FormerlySerializedAs("MinAnchors")] private Vector2 _minAnchors = Vector3.zero;
+            [SerializeField, FormerlySerializedAs("MaxAnchors")] private  Vector2 _maxAnchors = Vector3.one;
+            
+            public Vector2 MinAnchors => _minAnchors;
+            public Vector2 MaxAnchors => _maxAnchors;
 
             public float Left => _leftTop.x;
             public float Top => _leftTop.y;
             public float Right => _rightBottom.x;
             public float Bottom => _rightBottom.y;
+
+            public void SetValuesFromRectTransform(RectTransform rectTransform)
+            {
+                _leftTop = rectTransform.offsetMin;
+                _rightBottom = rectTransform.offsetMax;
+                _minAnchors = rectTransform.anchorMin;
+                _maxAnchors = rectTransform.anchorMax;
+            }
         }
 
         private struct SelectableColourBlocks
@@ -88,8 +108,9 @@ namespace UnityCommonFeatures
     
         private static readonly Dictionary<Type,UIPanel> _activePanels = new Dictionary<Type, UIPanel>();
     
-        public float ShowAmount => _currShowAmt;
-        public bool IsShowing => _currShowAmt > float.Epsilon;
+        public float CurrentShowAmount => _currShowAmt;
+        public bool IsShowing => CurrentPanelState == PanelState.Showing || CurrentPanelState == PanelState.ChangingToShow;
+        public PanelState CurrentPanelState { get; private set; } = PanelState.Hidden;
 
         [Conditional("UNITY_EDITOR")]
         protected virtual void OnValidate()
@@ -103,16 +124,29 @@ namespace UnityCommonFeatures
             {
                 _canvasGroup = GetComponent<CanvasGroup>();
             }
+
+            if (!Application.isPlaying)
+            {
+                _panelPositioning.SetValuesFromRectTransform(_rectTransform);
+            }
         }
 
         private void Awake()
         {
             CacheSelectablesColours();
 
-            if (GetType() != typeof(UIPanel))
+            Type type = GetType();
+            if (type != typeof(UIPanel))
             {
-                // Adding base class just confuses things - there is no case where we should be getting a UIPanel base class instance this way
-                _activePanels.Add(GetType(), this);
+                if (!_activePanels.ContainsKey(type))
+                {
+                    // Adding base class just confuses things - there is no case where we should be getting a UIPanel base class instance this way
+                    _activePanels.Add(type, this);
+                }
+                else
+                {
+                    Debug.LogError($"There are duplicate UIPanels of type {type}");
+                }
             }
 
             InternalAwake();
@@ -371,16 +405,24 @@ namespace UnityCommonFeatures
         protected virtual void OnShowStarted()
         {
             SetSelectablesColour(true);
+            CurrentPanelState = PanelState.ChangingToShow;
         }
 
         protected virtual void OnShowCompleted()
         {
             SetSelectablesColour(false);
+            CurrentPanelState = PanelState.Showing;
         }
-    
-        protected virtual void OnHideStarted() { }
-    
-        protected virtual void OnHideCompleted() { }
+
+        protected virtual void OnHideStarted()
+        {
+            CurrentPanelState = PanelState.ChangingToHide;
+        }
+
+        protected virtual void OnHideCompleted()
+        {
+            CurrentPanelState = PanelState.Hidden;
+        }
     
         protected virtual void OnShowAmountChanged(float showAmt) { }
         
