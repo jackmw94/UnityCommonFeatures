@@ -21,6 +21,8 @@ namespace UnityCommonFeatures
     /// </summary>
     public static class Logger
     {
+        // NOTE: use DISABLE_LOGGING symbol when changing project symbols
+        // conditional attribute cannot check for symbols NOT defined
         [Conditional("ENABLE_LOGGING")]
         public static void Log(string message)
         {

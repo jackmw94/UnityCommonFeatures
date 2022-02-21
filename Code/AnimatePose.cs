@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityExtras.Code.Core;
 using UnityExtras.Code.Optional.EasingFunctions;
+using UnityExtras.Core;
 
 namespace UnityCommonFeatures
 {

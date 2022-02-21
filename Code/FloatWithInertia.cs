@@ -22,10 +22,10 @@ namespace UnityCommonFeatures
 
         public void Tick()
         {
-            _current = GetInertiaChange(_inertia, _current, _target, _previousChange, out _previousChange);
+            _current = GetChange(_inertia, _current, _target, _previousChange, out _previousChange);
         }
         
-        private float GetInertiaChange(float inertia, float current, float target, float previousChange, out float change)
+        private float GetChange(float inertia, float current, float target, float previousChange, out float change)
         {
             change = inertia * previousChange + (target - current) * (1f - inertia);
             float next = current + change;

@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using TMPro;
 using UnityEngine;
-using UnityExtras.Code.Core;
+using UnityExtras.Core;
 
 namespace UnityCommonFeatures
 {
