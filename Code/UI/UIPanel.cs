@@ -5,7 +5,7 @@ using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
-using UnityExtras.Code.Core;
+using UnityExtras.Core;
 using static UnityExtras.Code.Optional.EasingFunctions.EasingFunctions;
 using Debug = UnityEngine.Debug;
 
@@ -14,14 +14,6 @@ namespace UnityCommonFeatures
     [DefaultExecutionOrder(-1), RequireComponent(typeof(CanvasGroup))]
     public class UIPanel : MonoBehaviour
     {
-        public enum PanelState
-        {
-            Hidden,
-            ChangingToShow,
-            Showing,
-            ChangingToHide
-        }
-        
         private class NoAnimationTypeException : Exception
         {
             public NoAnimationTypeException(string message) : base(message) { }
@@ -109,8 +101,8 @@ namespace UnityCommonFeatures
         private static readonly Dictionary<Type,UIPanel> _activePanels = new Dictionary<Type, UIPanel>();
     
         public float CurrentShowAmount => _currShowAmt;
-        public bool IsShowing => CurrentPanelState == PanelState.Showing || CurrentPanelState == PanelState.ChangingToShow;
-        public PanelState CurrentPanelState { get; private set; } = PanelState.Hidden;
+        public bool IsShowing => CurrentPanelState == VisibleState.Visible || CurrentPanelState == VisibleState.ChangingToVisible;
+        public VisibleState CurrentPanelState { get; private set; } = VisibleState.Hidden;
 
         [Conditional("UNITY_EDITOR")]
         protected virtual void OnValidate()
@@ -405,23 +397,23 @@ namespace UnityCommonFeatures
         protected virtual void OnShowStarted()
         {
             SetSelectablesColour(true);
-            CurrentPanelState = PanelState.ChangingToShow;
+            CurrentPanelState = VisibleState.ChangingToVisible;
         }
 
         protected virtual void OnShowCompleted()
         {
             SetSelectablesColour(false);
-            CurrentPanelState = PanelState.Showing;
+            CurrentPanelState = VisibleState.Visible;
         }
 
         protected virtual void OnHideStarted()
         {
-            CurrentPanelState = PanelState.ChangingToHide;
+            CurrentPanelState = VisibleState.ChangingToHidden;
         }
 
         protected virtual void OnHideCompleted()
         {
-            CurrentPanelState = PanelState.Hidden;
+            CurrentPanelState = VisibleState.Hidden;
         }
     
         protected virtual void OnShowAmountChanged(float showAmt) { }
