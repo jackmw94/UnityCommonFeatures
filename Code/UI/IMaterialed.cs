@@ -4,7 +4,7 @@ namespace UnityCommonFeatures
 {
     public interface IMaterialed
     {
-        void SetMaterial(Material material);
+        void SetMaterial(Material mat);
         Material GetMaterial();
     }
 }

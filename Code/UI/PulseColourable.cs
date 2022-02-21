@@ -1,11 +1,12 @@
-﻿using TMPro;
+﻿using System.Collections;
 using UnityEngine;
+using UnityExtras.Core;
 
 namespace UnityCommonFeatures
 {
-    public class PulseTextColour : MonoBehaviour
+    public class PulseColourable : MonoBehaviour
     {
-        [SerializeField] private TextMeshProUGUI _text;
+        [SerializeReference, SerializeField] private IColourable _colourable;
         [SerializeField] private AnimationCurve _animationCurve;
         [SerializeField] private Color _colour;
 
@@ -14,7 +15,7 @@ namespace UnityCommonFeatures
 
         private void Awake()
         {
-            _defaultColour = _text.color;
+            _defaultColour = _colourable.GetColour();
         }
 
         public void PulseColour()
@@ -27,9 +28,9 @@ namespace UnityCommonFeatures
             yield return Utilities.LerpOverTime(0f, _animationCurve.GetCurveDuration(), 1f, f =>
             {
                 float curvedF = _animationCurve.Evaluate(f);
-                _text.color = Color.Lerp(_defaultColour, _colour, curvedF);
+                _colourable.SetColour(Color.Lerp(_defaultColour, _colour, curvedF));
             });
-            _text.color = _defaultColour;
+            _colourable.SetColour(_defaultColour);
         }
     }
 }
