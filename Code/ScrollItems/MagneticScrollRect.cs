@@ -3,6 +3,7 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 using Debug = UnityEngine.Debug;
 
@@ -12,7 +13,7 @@ namespace UnityCommonFeatures
     public class MagneticScrollRect : MonoBehaviour, IBeginDragHandler, IEndDragHandler
     {
         [SerializeField] protected ScrollRect _scrollRect;
-        [SerializeField] protected RectTransform _root;
+        [FormerlySerializedAs("_root"), SerializeField] protected RectTransform _contentRoot;
         [Space(15)]
         [SerializeField] private bool _isVerticalScroll = true;
         [SerializeField] private Transform _selector;
@@ -53,7 +54,7 @@ namespace UnityCommonFeatures
 
         private void Update()
         {
-            if (_root.childCount == 0)
+            if (_contentRoot.childCount == 0)
             {
                 return;
             }
@@ -100,9 +101,9 @@ namespace UnityCommonFeatures
             float minimumDistanceFromSelector = float.MaxValue;
             _currentlySelectedIndex = -1;
 
-            for (int i = 0; i < _root.childCount; i++)
+            for (int i = 0; i < _contentRoot.childCount; i++)
             {
-                Transform childTransform = _root.GetChild(i);
+                Transform childTransform = _contentRoot.GetChild(i);
                 float childPosition = GetOneDimensionalPosition(childTransform);
                 float itemDistance = Mathf.Abs(childPosition - selectorPosition);
                 if (itemDistance < minimumDistanceFromSelector)
@@ -114,7 +115,7 @@ namespace UnityCommonFeatures
 
             if (_currentlySelectedIndex == -1)
             {
-                Debug.LogError($"Could not get a selected item despite there being {_root.childCount} items");
+                Debug.LogError($"Could not get a selected item despite there being {_contentRoot.childCount} items");
                 return;
             }
             
@@ -133,14 +134,14 @@ namespace UnityCommonFeatures
 
         private void HandleMagnetism()
         {
-            Vector2 rootSizeDelta = _root.sizeDelta;
+            Vector2 rootSizeDelta = _contentRoot.sizeDelta;
             float rootSizeAxis = _isVerticalScroll ? rootSizeDelta.y : rootSizeDelta.x;
             if (_isScrollRectInteractedWith || rootSizeAxis < float.Epsilon)
             {
                 return;
             }
 
-            Transform selectedItemTransform = _root.GetChild(_currentlySelectedIndex);
+            Transform selectedItemTransform = _contentRoot.GetChild(_currentlySelectedIndex);
             float distanceToSelector = GetOneDimensionalPosition(_selector) - GetOneDimensionalPosition(selectedItemTransform);
             float fractionalDistance = distanceToSelector / rootSizeAxis;
             float moveDistance = _magnetismFactor * fractionalDistance;
@@ -164,7 +165,7 @@ namespace UnityCommonFeatures
         [ContextMenu(nameof(NameObjectsFromLabels))]
         private void NameObjectsFromLabels()
         {
-            foreach (Transform child in _root)
+            foreach (Transform child in _contentRoot)
             {
                 TextMeshProUGUI label = child.GetComponentInChildren<TextMeshProUGUI>();
                 child.gameObject.name = label.text;
