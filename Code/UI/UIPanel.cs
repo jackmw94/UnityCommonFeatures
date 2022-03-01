@@ -60,6 +60,7 @@ namespace UnityCommonFeatures
             Bottom = 1 << 3,
             Top = 1 << 4,
             VerticalScale = 1 << 5,
+            HorizontalScale = 1 << 6,
         }
 
         private enum StartBehaviour
@@ -74,16 +75,16 @@ namespace UnityCommonFeatures
         [SerializeField] protected CanvasGroup _canvasGroup;
 
         [Header("Show")]
-        [SerializeField] private float _showDuration = 0.5f;
+        [SerializeField] private float _showDuration = 0.33f;
         [SerializeField] private AnimateType _showAnimateType = AnimateType.Fade;
-        [SerializeField] private EasingType _showEasingType = EasingType.Linear;
-        [SerializeField] private EasingDirection _showEasingDirection = EasingDirection.Out;
+        [SerializeField] private EasingType _showEasingType = EasingType.Sine;
+        [SerializeField] private EasingDirection _showEasingDirection = EasingDirection.InAndOut;
 
         [Header("Hide")]
-        [SerializeField] private float _hideDuration = 0.25f;
+        [SerializeField] private float _hideDuration = 0.33f;
         [SerializeField] private AnimateType _hideAnimateType = AnimateType.Fade;
-        [SerializeField] private EasingType _hideEasingType = EasingType.Linear;
-        [SerializeField] private EasingDirection _hideEasingDirection = EasingDirection.In;
+        [SerializeField] private EasingType _hideEasingType = EasingType.Sine;
+        [SerializeField] private EasingDirection _hideEasingDirection = EasingDirection.InAndOut;
     
         [Header("Other")]
         [SerializeField] private StartBehaviour _startBehaviour = StartBehaviour.HideInstant;
@@ -132,12 +133,12 @@ namespace UnityCommonFeatures
             {
                 if (!_activePanels.ContainsKey(type))
                 {
-                    // Adding base class just confuses things - there is no case where we should be getting a UIPanel base class instance this way
+                    // There is no case where we should be getting a UIPanel base class instance this way
                     _activePanels.Add(type, this);
                 }
                 else
                 {
-                    Debug.LogError($"There are duplicate UIPanels of type {type}");
+                    _activePanels[type] = null;
                 }
             }
 
@@ -175,12 +176,12 @@ namespace UnityCommonFeatures
     
         public static T GetPanel<T>() where T : UIPanel
         {
-            if (_activePanels.TryGetValue(typeof(T), out UIPanel panel))
+            if (!_activePanels.TryGetValue(typeof(T), out UIPanel panel))
             {
-                Debug.Assert(panel, "Panel doesn't exist despite being in the active panels dictionary. Did you implement OnDestroy without calling base.OnDestroy()?");
-                return panel as T;
+                throw new ArgumentException($"No UI panel exists for type {typeof(T)}. If it definitely exists and is enabled, check it's not implementing Awake without calling base.Awake()");
             }
-            throw new ArgumentException($"No UI panel exists for type {typeof(T)}. If it definitely exists and is enabled, check it's not implementing Awake without calling base.Awake()");
+            Debug.Assert(panel, "Panel doesn't exist despite being in the active panels dictionary. This happens if there are multiple instances of this panel in the scene.");
+            return panel as T;
         }
 
         public void ShowHide(bool show, bool instant = false, Action onComplete = null)
@@ -382,6 +383,11 @@ namespace UnityCommonFeatures
         {
             _rectTransform.localScale = _rectTransform.localScale.ModifyVectorElement(1, verticalScale);
         }
+        
+        private void SetHorizontalScaleAmount(float horizontalScale)
+        {
+            _rectTransform.localScale = _rectTransform.localScale.ModifyVectorElement(0, horizontalScale);
+        }
     
         private void SetFadeAmount(float fade)
         {
@@ -430,43 +436,30 @@ namespace UnityCommonFeatures
             switch (animateType)
             {
                 case AnimateType.None:
-                {
                     return;
-                }
                 case AnimateType.Fade:
-                {
-                    SetFadeAmount(showingAmt); 
+                    SetFadeAmount(showingAmt);
                     return;
-                }
                 case AnimateType.Left:
-                {
-                    SetLeftAmount(showingAmt); 
+                    SetLeftAmount(showingAmt);
                     return;
-                }
                 case AnimateType.Right:
-                {
-                    SetRightAmount(showingAmt); 
+                    SetRightAmount(showingAmt);
                     return;
-                }
                 case AnimateType.Bottom:
-                {
-                    SetBottomAmount(showingAmt); 
+                    SetBottomAmount(showingAmt);
                     return;
-                }
                 case AnimateType.Top:
-                {
-                    SetTopAmount(showingAmt); 
+                    SetTopAmount(showingAmt);
                     return;
-                }
                 case AnimateType.VerticalScale:
-                {
                     SetVerticalScaleAmount(showingAmt);
                     return;
-                }
+                case AnimateType.HorizontalScale:
+                    SetHorizontalScaleAmount(showingAmt);
+                    return;
                 default:
-                {
                     throw new NoAnimationTypeException($"Can't animate panel for animate type {animateType}");
-                }
             }
         }
     
