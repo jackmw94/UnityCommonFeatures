@@ -3,6 +3,7 @@ using UnityEngine.UI;
 
 namespace UnityCommonFeatures
 {
+    [AddComponentMenu("UI/Colourable Image", 11)]
     public class ColourableImage : Image, IColourable, IMaterialed
     {
         public void SetColour(Color colour)
