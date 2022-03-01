@@ -12,7 +12,7 @@ using Debug = UnityEngine.Debug;
 namespace UnityCommonFeatures
 {
     [DefaultExecutionOrder(-1), RequireComponent(typeof(CanvasGroup))]
-    public class UIPanel : MonoBehaviour
+    public class UIPanel : MonoBehaviour, IActivateable
     {
         private class NoAnimationTypeException : Exception
         {
@@ -183,6 +183,8 @@ namespace UnityCommonFeatures
             Debug.Assert(panel, "Panel doesn't exist despite being in the active panels dictionary. This happens if there are multiple instances of this panel in the scene.");
             return panel as T;
         }
+        
+        public void SetActivated(bool activated) => ShowHide(activated);
 
         public void ShowHide(bool show, bool instant = false, Action onComplete = null)
         {
