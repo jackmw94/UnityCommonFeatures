@@ -1,21 +1,28 @@
 ﻿using System.Collections;
+using System.Diagnostics;
 using UnityEngine;
 using UnityExtras.Core;
 
 namespace UnityCommonFeatures
 {
-    public class PulseColourable : MonoBehaviour
+    public class PulseColourable : MonoBehaviour, IActivateable, IColourable
     {
-        [SerializeReference, SerializeField] private IColourable _colourable;
+        [SerializeField] private InterfaceComponentWrapper<IColourable> _colourable = new InterfaceComponentWrapper<IColourable>();
         [SerializeField] private AnimationCurve _animationCurve;
         [SerializeField] private Color _colour;
 
         private Color _defaultColour;
         private Coroutine _pulseCoroutine = null;
 
-        private void Awake()
+        [Conditional("UNITY_EDITOR")]
+        protected virtual void OnValidate()
         {
-            _defaultColour = _colourable.GetColour();
+            _colourable.Validate();
+        }
+
+        protected virtual void Awake()
+        {
+            _defaultColour = _colourable.Component.GetColour();
         }
 
         public void PulseColour()
@@ -23,14 +30,42 @@ namespace UnityCommonFeatures
             this.RestartCoroutine(ref _pulseCoroutine, PulseCoroutine());
         }
 
+        public void StopPulse()
+        {
+            StopCoroutine(_pulseCoroutine);
+            _colourable.Component.SetColour(_defaultColour);
+        }
+
         private IEnumerator PulseCoroutine()
         {
             yield return Utilities.LerpOverTime(0f, _animationCurve.GetCurveDuration(), 1f, f =>
             {
                 float curvedF = _animationCurve.Evaluate(f);
-                _colourable.SetColour(Color.Lerp(_defaultColour, _colour, curvedF));
+                _colourable.Component.SetColour(Color.Lerp(_defaultColour, _colour, curvedF));
             });
-            _colourable.SetColour(_defaultColour);
+            _colourable.Component.SetColour(_defaultColour);
+        }
+
+        public void SetActivated(bool activated)
+        {
+            if (activated)
+            {
+                PulseColour();
+            }
+            else
+            {
+                StopPulse();
+            }
+        }
+
+        public void SetColour(Color colour)
+        {
+            _colour = colour;
+        }
+
+        public Color GetColour()
+        {
+            return _colour;
         }
     }
 }
