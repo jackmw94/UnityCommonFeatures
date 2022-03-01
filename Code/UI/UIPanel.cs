@@ -91,7 +91,7 @@ namespace UnityCommonFeatures
         [SerializeField, Tooltip("The reduction in distance travelled for directional show hide animations")] 
         private float _directionalShowHideOffset = 0.9f;
 
-        [SerializeField] private Positioning _panelPositioning;
+        [SerializeField] private Positioning _panelPositioning = new Positioning();
 
         private Coroutine _showHideCoroutine = null;
         private float _currShowAmt = 0f;
@@ -175,7 +175,7 @@ namespace UnityCommonFeatures
     
         public static T GetPanel<T>() where T : UIPanel
         {
-            if (_activePanels.TryGetValue(typeof(T), out var panel))
+            if (_activePanels.TryGetValue(typeof(T), out UIPanel panel))
             {
                 Debug.Assert(panel, "Panel doesn't exist despite being in the active panels dictionary. Did you implement OnDestroy without calling base.OnDestroy()?");
                 return panel as T;
@@ -261,8 +261,8 @@ namespace UnityCommonFeatures
             _rectTransform.localPosition = Vector3.zero;
             _rectTransform.anchoredPosition = Vector2.zero;
 
-            _rectTransform.offsetMin = new Vector2(_panelPositioning.Left, _panelPositioning.Bottom);
-            _rectTransform.offsetMax = new Vector2(_panelPositioning.Right, _panelPositioning.Top);
+            _rectTransform.offsetMin = new Vector2(_panelPositioning.Left, _panelPositioning.Top);
+            _rectTransform.offsetMax = new Vector2(_panelPositioning.Right, _panelPositioning.Bottom);
 
             float duration = instant ? 0f : _showDuration;
             yield return Utilities.LerpOverTime(_currShowAmt, 1f, duration, f =>
@@ -323,8 +323,8 @@ namespace UnityCommonFeatures
             // convert left into reduced lerp value
             left = Mathf.Lerp(_directionalShowHideOffset, 1f, left);
         
-            var anchorMin = _rectTransform.anchorMin;
-            var anchorMax = _rectTransform.anchorMax;
+            Vector2 anchorMin = _rectTransform.anchorMin;
+            Vector2 anchorMax = _rectTransform.anchorMax;
         
             anchorMin.x = left - 1f + _panelPositioning.MinAnchors.x;
             anchorMax.x = left - (1f - _panelPositioning.MaxAnchors.x);
@@ -338,8 +338,8 @@ namespace UnityCommonFeatures
             // convert right into reduced lerp value
             right = Mathf.Lerp(_directionalShowHideOffset, 1f, right);
         
-            var anchorMin = _rectTransform.anchorMin;
-            var anchorMax = _rectTransform.anchorMax;
+            Vector2 anchorMin = _rectTransform.anchorMin;
+            Vector2 anchorMax = _rectTransform.anchorMax;
         
             anchorMin.x = 1f - right + _panelPositioning.MinAnchors.x;
             anchorMax.x = 2f - right - (1f - _panelPositioning.MaxAnchors.x);
@@ -353,8 +353,8 @@ namespace UnityCommonFeatures
             // convert bottom into reduced lerp value
             bottom = Mathf.Lerp(_directionalShowHideOffset, 1f, bottom);
         
-            var anchorMin = _rectTransform.anchorMin;
-            var anchorMax = _rectTransform.anchorMax;
+            Vector2 anchorMin = _rectTransform.anchorMin;
+            Vector2 anchorMax = _rectTransform.anchorMax;
         
             anchorMin.y = bottom - 1f + _panelPositioning.MinAnchors.y;
             anchorMax.y = bottom - (1f - _panelPositioning.MaxAnchors.y);
@@ -368,8 +368,8 @@ namespace UnityCommonFeatures
             // Convert top into reduced lerp value
             top = Mathf.Lerp(_directionalShowHideOffset, 1f, top);
         
-            var anchorMin = _rectTransform.anchorMin;
-            var anchorMax = _rectTransform.anchorMax;
+            Vector2 anchorMin = _rectTransform.anchorMin;
+            Vector2 anchorMax = _rectTransform.anchorMax;
         
             anchorMin.y = 1f - top + _panelPositioning.MinAnchors.y;
             anchorMax.y = 2f - top - (1f - _panelPositioning.MaxAnchors.y);
