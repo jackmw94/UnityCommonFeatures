@@ -11,6 +11,11 @@ using Debug = UnityEngine.Debug;
 
 namespace UnityCommonFeatures
 {
+    /// <summary>
+    /// Base class for any UI that will be shown/hidden with a transition
+    /// This class handles various transition types and maintaining a consistent
+    /// value for how 'shown' it is.
+    /// </summary>
     [DefaultExecutionOrder(-1), RequireComponent(typeof(CanvasGroup))]
     public class UIPanel : MonoBehaviour, IActivateable
     {
